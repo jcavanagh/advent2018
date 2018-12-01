@@ -1,14 +1,6 @@
 package p01
 
-import java.io.File
-
-fun readFile(file: String): List<Int> {
-  val lines = mutableListOf<Int>()
-
-  File(file).forEachLine { line: String -> lines.add(line.toInt(10)) }
-
-  return lines
-}
+import common.file.*
 
 fun sum(lines: List<Int>) {
   println("Sum: ${lines.sum()}")
@@ -33,11 +25,11 @@ fun firstRepeat(lines: List<Int>) {
     }
   }
 
-  println("First Repeat: ${foundVal}")
+  println("First Repeat: $foundVal")
 }
 
 fun main(args: Array<String>) {
-  val lines = readFile("src/p01/input.txt")
+  val lines = readLines("src/p01/input.txt") { line: String -> line.toInt(10) }
 
   sum(lines)
   firstRepeat(lines)
