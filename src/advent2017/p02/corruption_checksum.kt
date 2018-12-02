@@ -1,4 +1,4 @@
-package p02
+package advent2017.p02
 
 import common.file.*
 
@@ -32,7 +32,7 @@ fun checksum(sheet: List<List<Int>>): Int {
 }
 
 fun main(args: Array<String>) {
-  val sheet = readLines("src/p02/input.txt") {
+  val sheet = readLines("src/advent2017.p02/input.txt") {
      line: String ->
         line.split('\t').map { it.toInt(10) }
   }
