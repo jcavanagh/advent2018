@@ -32,3 +32,9 @@ lib/
 
 # Ignore Gradle build output directory
 build
+
+# Other garbage
+.settings/
+bin/
+.classpath
+.project

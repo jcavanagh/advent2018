@@ -9,4 +9,4 @@
 
 rootProject.name = "advent2018"
 
-include("common", "p01", "p02", "p03", "p04", "p05", "p06", "p07", "p08")
+include("common", "p01", "p02", "p03", "p04", "p05", "p06", "p07", "p08", "p09")
