@@ -13,11 +13,11 @@ class MarbleManiaTest {
     //21 players; last marble is worth 6111 points: high score is 54718
     //30 players; last marble is worth 5807 points: high score is 37305
     val testData = listOf(
-      Triple(10, 1618, 8317),
-      Triple(13, 7999, 146373),
-      Triple(17, 1104, 2764),
-      Triple(21, 6111, 54718),
-      Triple(30, 5807, 37305)
+      Triple(10, 1618, 8317L),
+      Triple(13, 7999, 146373L),
+      Triple(17, 1104, 2764L),
+      Triple(21, 6111, 54718L),
+      Triple(30, 5807, 37305L)
     )
 
     for(datum in testData) {
