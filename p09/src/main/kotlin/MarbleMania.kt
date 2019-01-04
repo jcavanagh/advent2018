@@ -1,62 +1,49 @@
 package p09
 
-data class Marble(val value: Int)
-
-class MarbleGame(val numPlayers: Int, val numMarbles: Int) {
-  var currentIndex = 0
+class MarbleGame {
+  var currentNode: CircularLinkedList.Node<Int>
   var currentMarble = 1
-  var circle = mutableListOf<Marble>()
-  var scores = mutableMapOf<Int, Int>()
+  var circle = CircularLinkedList(0)
+  var scores = mutableMapOf<Int, Long>()
 
-  init {
-    circle.add(Marble(0))
+  private val numPlayers: Int
+  private val numMarbles: Int
+
+  constructor(numPlayers: Int, numMarbles: Int) {
+    this.numPlayers = numPlayers
+    this.numMarbles = numMarbles
+    currentNode = circle.head
   }
 
-  fun getIndex(relativeMove: Int): Int {
-    if(circle.size == 0) { return 0 }
-    if(circle.size == 1) { return 1 }
-
-    var nextIndex = currentIndex + relativeMove
-    if(nextIndex < 0) {
-      nextIndex = circle.size - (Math.abs(nextIndex) % circle.size)
-    }
-
-    if(nextIndex > circle.size) {
-      return nextIndex % circle.size
-    }
-
-    return nextIndex
-  }
-
-  fun nextMarble(add: Boolean = false) {
-    currentMarble++
-    if(add) {
-      circle.add(Marble(currentMarble))
+  private fun move(relativeMove: Int) {
+    for(i in 1..Math.abs(relativeMove)) {
+      currentNode = when(relativeMove < 0) {
+        true -> currentNode.prev
+        false -> currentNode.next
+      }
     }
   }
 
   //Executes a turn, returns the points for that turn
   fun turn(): Int {
-    val next = Marble(currentMarble)
-
     var points = 0
-    if(next.value % 23 == 0) {
-      val removeIndex = getIndex(-7)
-      val removed = circle.removeAt(removeIndex)
-      currentIndex = removeIndex
-      points = next.value + removed.value
+    if(currentMarble % 23 == 0) {
+      move(-7)
+      val removedValue = currentNode.value
+      circle.remove(currentNode)
+      currentNode = currentNode.next
+      points = currentMarble + removedValue
     } else {
-      val index = getIndex(2)
-      circle.add(index, next)
-      currentIndex = index
+      move(1)
+      currentNode = circle.add(currentMarble, currentNode)
     }
 
-    nextMarble()
+    currentMarble++
 
     return points
   }
 
-  fun play(): Pair<Int, Int> {
+  fun play(): Pair<Int, Long> {
     var player = 0
     while(currentMarble <= numMarbles) {
       val points = turn()
@@ -68,7 +55,7 @@ class MarbleGame(val numPlayers: Int, val numMarbles: Int) {
       player %= numPlayers
     }
 
-    return scores.maxBy { it.value }?.toPair() ?: Pair(-1, -1)
+    return scores.maxBy { it.value }?.toPair() ?: Pair(-1, -1L)
   }
 }
 
@@ -77,6 +64,8 @@ fun main() {
   val lastMarbleValue = 70901
 
   val winner = MarbleGame(players, lastMarbleValue).play()
-
   println("Winner: Player ${winner.first}, with ${winner.second} points")
+
+  val winner2 = MarbleGame(players, lastMarbleValue * 100).play()
+  println("Winner (100x): Player ${winner2.first}, with ${winner2.second} points")
 }

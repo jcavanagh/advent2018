@@ -30,14 +30,6 @@ class MarbleManiaTest {
     }
   }
 
-  private fun makeMG(circleLength: Int): MarbleGame {
-    val mg = MarbleGame(1000, circleLength + 1)
-    for (item in 0..circleLength) {
-      mg.nextMarble(true)
-    }
-    return mg
-  }
-
   @Test fun testTurn() {
     val points = listOf(
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -87,50 +79,12 @@ class MarbleManiaTest {
       val turnPoints = mg.turn()
       assertEquals(points[idx], turnPoints, "Points for turn $idx not as expected")
       assertEquals(circleState[idx], mg.circle.map { it.value }, "Circle state for turn $idx not as expected")
-      val currentMarbleIdx = mg.circle.map { it.value }.indexOf(currentMarble[idx])
-      assertEquals(currentMarbleIdx, mg.currentIndex, "Current marble index for turn $idx not as expected")
+      assertEquals(circleState[idx].reversed(), mg.circle.mapFromTail { it.value }, "Reversed circle state for turn $idx not as expected")
     }
 
     val mg2 = MarbleGame(9, 24)
     val score = mg2.play()
 
     assertEquals(32, score.second)
-  }
-
-  @Test fun testIndexing() {
-    //Circle size (minus one), initial index, relative
-    val testData = listOf(
-      //Small lists
-      Pair(Triple(0, 0, 1), 1),
-      Pair(Triple(0, 0, -1), 1),
-      Pair(Triple(1, 0, 1), 1),
-      Pair(Triple(1, 1, 1), 2),
-      Pair(Triple(2, 1, -1), 0),
-      Pair(Triple(2, 2, 1), 3),
-
-      //Medium lists
-      Pair(Triple(10, 0, -1), 11),
-
-      //Wrap forward
-      Pair(Triple(10, 10, 5), 3),
-      Pair(Triple(10, 5, 5), 10),
-      Pair(Triple(10, 0, 5), 5),
-      Pair(Triple(10, 6, 5), 11),
-
-      //Wrap backward
-      Pair(Triple(10, 0, -5), 7),
-      Pair(Triple(10, 5, -5), 0),
-      Pair(Triple(10, 1, -1), 0),
-      Pair(Triple(10, 0, -1), 11)
-    )
-
-    for (datum in testData) {
-      val testData = datum.first
-      val mg = makeMG(testData.first)
-      mg.currentIndex = testData.second
-      val result = mg.getIndex(testData.third)
-
-      assertEquals(datum.second, result, "getIndex assertion failed for $testData")
-    }
   }
 }
