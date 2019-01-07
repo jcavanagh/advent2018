@@ -27,14 +27,17 @@ enum class FACING {
 class Cart(var facing: FACING, var node: Node? = null) {
   private var turnIdx = 0
   private val turnSequence = listOf(-1, 0, 1)
+  var alive = true
 
   fun turn() {
+    if(!alive) { return }
     facing = facing.relative(turnSequence[turnIdx])
     turnIdx++
     turnIdx %= turnSequence.size
   }
 
   fun move() {
+    if(!alive) { return }
     val _node = node ?: throw Exception("Cart's off the rails, RIP")
 
     if (_node.isIntersection()) {
@@ -211,36 +214,62 @@ fun load(lines: List<String>): List<Cart> {
   return carts
 }
 
-fun collide(carts: List<Cart>): List<Node?> {
-  fun checkCollision(): List<Node?>? {
-    val nodes = carts.map { it.node }
-    val counted = nodes.groupingBy { it }.eachCount()
-    val collisions = counted.filter { it.value > 1 }
-    if(collisions.isNotEmpty()) {
-      return collisions.map { it.key }
-    }
-
-    return null
+fun checkCollision(carts: List<Cart>): List<Node?>? {
+  val nodes = carts.filter { it.alive }.map { it.node }
+  val counted = nodes.groupingBy { it }.eachCount()
+  val collisions = counted.filter { it.value > 1 }
+  if(collisions.isNotEmpty()) {
+    //Kill all collided carts
+    carts.filter { collisions.contains(it.node) }.forEach { it.alive = false }
+    return collisions.map { it.key }
   }
 
+  return null
+}
+
+fun sortCarts(carts: List<Cart>): List<Cart> {
+  return carts.sortedWith(compareBy({ it.node!!.y }, { it.node!!.x }))
+}
+
+fun firstCollision(carts: List<Cart>): List<Node?> {
   var collision: List<Node?>? = null
   do {
-    carts.forEach {
+    val sorted = sortCarts(carts)
+    sorted.forEach {
       it.move()
-      collision = checkCollision()
+      collision = checkCollision(sorted)
       if(collision != null) { return collision!! }
     }
-
   } while(collision == null)
 
   return collision!!
 }
 
+fun lastRemaining(carts: List<Cart>): Cart? {
+  do {
+    val sorted = sortCarts(carts).filter { it.alive }
+    sorted.forEach {
+      if(sorted.size == 1) {
+        return sorted[0]
+      }
+      it.move()
+      checkCollision(sorted)
+    }
+  } while(sorted.size > 1)
+
+  return null
+}
+
 fun main(args: Array<String>) {
   val lines = readLines("input.txt")
+
   val carts = load(lines)
-  val collisions = collide(carts)
+  val collisions = firstCollision(carts)
   collisions.forEach {
     println("Collision: (${it?.x},${it?.y})")
   }
+
+  val carts2 = load(lines)
+  val highlander = lastRemaining(carts2)
+  println("Last cart: (${highlander?.node?.x},${highlander?.node?.y})")
 }
