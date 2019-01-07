@@ -28,7 +28,7 @@ class Cart(var facing: FACING, var node: Node? = null) {
   private var turnIdx = 0
   private val turnSequence = listOf(-1, 0, 1)
 
-  private fun turn() {
+  fun turn() {
     facing = facing.relative(turnSequence[turnIdx])
     turnIdx++
     turnIdx %= turnSequence.size
@@ -68,6 +68,10 @@ class Node(
   }
 
   fun initialize(up: Node?, right: Node?, down: Node?, left: Node?) {
+    if(!listOf('-', '|', '/', '\\', '+').contains(originalChar)) {
+      throw Exception("Invalid node character: $originalChar")
+    }
+
     when(originalChar) {
       '-' -> {
         this.left = left
@@ -80,8 +84,8 @@ class Node(
       '/', '\\' -> {
         if(up?.originalChar != '-') { this.up = up }
         if(right?.originalChar != '|') { this.right = right }
-        if(left?.originalChar != '|') { this.left = left }
         if(down?.originalChar != '-') { this.down = down }
+        if(left?.originalChar != '|') { this.left = left }
       }
       '+' -> {
         this.up = up
@@ -89,6 +93,11 @@ class Node(
         this.down = down
         this.left = left
       }
+    }
+
+    //Sanity check
+    if(originalChar == '+') {
+      assert(isIntersection())
     }
   }
 
@@ -139,7 +148,6 @@ class Node(
               FACING.RIGHT -> Pair(down!!, FACING.DOWN)
               FACING.DOWN -> Pair(right!!, FACING.RIGHT)
               FACING.LEFT -> Pair(up!!, FACING.UP)
-              else -> throw NoPathException(facing)
             }
           else -> throw NoPathException(facing)
         }
@@ -217,11 +225,15 @@ fun collide(carts: List<Cart>): List<Node?> {
 
   var collision: List<Node?>? = null
   do {
-    carts.forEach { it.move() }
-    collision = checkCollision()
+    carts.forEach {
+      it.move()
+      collision = checkCollision()
+      if(collision != null) { return collision!! }
+    }
+
   } while(collision == null)
 
-  return collision
+  return collision!!
 }
 
 fun main(args: Array<String>) {
